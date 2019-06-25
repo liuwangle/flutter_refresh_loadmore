@@ -4,7 +4,7 @@ A refresh loadmore listview package.
 
 ## Getting Started
 Installing
-flutter_refresh_loadmore: ^0.0.8
+flutter_refresh_loadmore: ^0.0.9
 
 Import
 import 'package:flutter_refresh_loadmore/flutter_refresh_loadmore.dart';
@@ -94,3 +94,12 @@ How To Use
       ),
     );
   }
+
+
+下拉默认刷新效果
+https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/refresh.gif
+
+
+
+加载默认更多效果
+https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/loadmore.gif
