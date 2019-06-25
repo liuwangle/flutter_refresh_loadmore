@@ -56,7 +56,7 @@ How To Use
          child: RefreshLoadMoreWidget(
 
            key: _globalKey,
-           //必传
+           //必传  listview 的 item widget
            swrapInsideWidget: (context, index) {
              return Container(
                alignment: Alignment.center,
