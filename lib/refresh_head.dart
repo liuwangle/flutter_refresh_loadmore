@@ -1,151 +1,112 @@
-import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'flutter_refresh_loadmore.dart';
 import 'rotate_widget.dart';
 
-//高度回调
-typedef HeightsCallBack = double Function();
-
-//animationcontroller 回调
-typedef GetAnimationController = void Function(AnimationController controller);
-
-//head  动画执行完成回调
-typedef DefaultHeadAnimationComplete = void Function();
-
-typedef SwrapHeadWidget = Widget Function(String statusStr);
-typedef SwrapFooterWidget = Widget Function(String statusStr);
-
-class DefaultHead extends StatefulWidget {
-  HeightsCallBack heightsCallBack;
-  GetAnimationController getAnimationController;
-  DefaultHeadAnimationComplete oneceAnimationComplete;
-  DefaultHeadAnimationComplete headAnimationComplete;
-
-  double normalHeight;
-  GlobalKey key;
-  SwrapHeadWidget swrapHeadWidget;
-
-  DefaultHead(
-      {this.key,
-      this.heightsCallBack,
-      this.getAnimationController,
-      this.oneceAnimationComplete,
-      this.headAnimationComplete,
-      this.swrapHeadWidget,
-      this.normalHeight})
-      : super(key: key);
-
-  _DefaultHeadState __defaultHeadState;
-
+import 'refresh_data.dart';
+////高度回调
+//typedef HeightsCallBack = double Function();
+class CustomHead extends StatefulWidget {
+  double currentHeight;
+  HeadRefreshWidget child;
+  HeadStatus headStatus;
+  CustomHead({Key key,this.currentHeight,this.child,this.headStatus=HeadStatus.IDLE}):super(key:key);
   @override
   State<StatefulWidget> createState() {
-    if (__defaultHeadState == null) {
-      __defaultHeadState = _DefaultHeadState();
-    }
+    return CustomHeadState();
+  }
 
-    return __defaultHeadState;
+  updateHeight({double height ,HeadStatus headStatus}){
+    this.currentHeight=height;
+    this.headStatus=headStatus;
   }
 }
-
-class _DefaultHeadState extends State<DefaultHead>
-    with TickerProviderStateMixin {
-  AnimationController positionController;
-
-//  AnimationController controller;
-//  CurvedAnimation curved;
-//  Animation  rotate;
-
-  _DefaultHeadState();
-
-  @override
-  void initState() {
-//    controller = AnimationController( duration: const Duration(milliseconds: 1000),vsync: this);
-    positionController = AnimationController(
-        duration: const Duration(milliseconds: 400), vsync: this);
-
-//    curved = new CurvedAnimation(parent: controller, curve:Interval(0.1, 0.3,curve:  Curves.linear),);
-//    rotate=Tween<double>(begin: 0, end: 10,).animate(controller);
-    positionController.addListener(() {
-      setState(() {});
-    });
-    positionController.addStatusListener((status) {
-      if (AnimationStatus.completed == status) {
-        if (widget.heightsCallBack() > 0) {
-          widget.oneceAnimationComplete();
-        } else {
-          widget.headAnimationComplete();
-          lastStatu = "";
-        }
-      }
-    });
-    widget.getAnimationController(positionController);
-
-    super.initState();
-//    controller.repeat();
-  }
-
-  RotateWidget rotateWidget;
-
-  bool shouldIsRotate = false;
-
+RotateWidget rotateWidget;
+class CustomHeadState extends State<CustomHead> {
+  double normalHeight=0;
   @override
   Widget build(BuildContext context) {
-    rotateWidget = RotateWidget(
-      isStartAnimation: shouldIsRotate,
-    );
-    print("fffffffffffffff  ${shouldIsRotate}");
+    normalHeight = RefreshDataWidget.of(context).normalHeight;
+   String statusStr= getText();
     return Container(
       color: Colors.black12,
-      height: widget.heightsCallBack(),
-      child: widget.swrapHeadWidget == null
-          ? Container(
-              margin: EdgeInsets.only(bottom: 20),
-              height: widget.normalHeight,
+      height: widget.currentHeight,
+      child: SingleChildScrollView(
+          child: new Container(
+//            alignment: Alignment.bottomCenter,
+            height: widget.currentHeight,
+            child: Stack(
               alignment: Alignment.bottomCenter,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  rotateWidget,
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    getText(),
-                    style: TextStyle(fontSize: 15),
-                  )
-                ],
-              ))
-          : widget.swrapHeadWidget(getText()),
+              children: <Widget>[
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  child: Align(
+//                  alignment: Alignment.bottomCenter,
+                      child: new Container(
+//                    color: Colors.deepOrange,
+//                    alignment: Alignment.bottomCenter,
+                        height: normalHeight,
+                        child:_getChildWidget(statusStr)
+
+
+                       ,
+                      )),
+                )
+              ],
+            ),
+          )),
     );
   }
 
-  String lastStatu = "";
+  _getChildWidget(String statusStr){
+    if(widget.child!=null){
+      return widget.child(widget.headStatus,widget.currentHeight);
+    }
+    return  new Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        RotateWidget(
+          headStatus: widget.headStatus,
+          parentHeight: widget.currentHeight,
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Text(
+          statusStr,
+          style: TextStyle(fontSize: 15),
+        )
+      ],
+    );
+  }
+
+
 
   String getText() {
     String statu = "";
-    if (widget.heightsCallBack() > widget.normalHeight) {
-      if (positionController.isAnimating) {
-        statu = "正加载中";
-      } else {
-        statu = "松开刷新";
-      }
-    } else if (widget.heightsCallBack() == widget.normalHeight) {
-      statu = "正加载中";
-    } else {
-      if (lastStatu == "加载完成" || lastStatu == "正加载中") {
-        statu = "加载完成";
-      } else {
-        statu = "下拉刷新";
-      }
-    }
+    switch(widget.headStatus){
 
-    lastStatu = statu;
-    if ("正加载中" == statu) {
-      shouldIsRotate = true;
-    } else {
-      shouldIsRotate = false;
+      case HeadStatus.IDLE:
+        statu = "下拉刷新";
+        break;
+      case HeadStatus.PULL_REFRESH:
+        statu = "下拉刷新";
+        break;
+      case HeadStatus.RELEASE_REFESH:
+        statu = "松开刷新";
+        break;
+      case HeadStatus.FRESHING:
+        statu = "正加载中";
+        break;
+      case HeadStatus.REFRESH_COMPLETE:
+        statu = "加载完成";
+        break;
     }
     return statu;
   }
+
 }

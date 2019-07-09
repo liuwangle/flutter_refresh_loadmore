@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class RotateWidget extends StatefulWidget {
-  bool isStartAnimation;
+import 'flutter_refresh_loadmore.dart';
 
-  RotateWidget({this.isStartAnimation});
+class RotateWidget extends StatefulWidget {
+
+  double parentHeight;
+
+  //松开手指的时候
+  HeadStatus headStatus;
+  RotateWidget({this.headStatus,this.parentHeight });
 
   @override
   State<StatefulWidget> createState() {
@@ -26,7 +31,9 @@ class _RotateWidget extends State<RotateWidget> with TickerProviderStateMixin {
   void initState() {
     controller = AnimationController(
         duration: Duration(milliseconds: 800), vsync: this);
-    Tween tween = Tween(begin: 0, end: math.pi * 2);
+
+//    math.pi * 2  一圈 360度
+    Tween<double> tween = Tween(begin: 0.0, end: math.pi * 2);
     _value = tween.animate(controller);
     controller.addListener(() {
       if(controller.value==1){
@@ -53,9 +60,11 @@ class _RotateWidget extends State<RotateWidget> with TickerProviderStateMixin {
 //
 //      }
 //    }
-    if (!controller.isAnimating && widget.isStartAnimation) {
+
+
+    if (!controller.isAnimating&&widget.headStatus==HeadStatus.FRESHING) {
       controller.forward();
-    } else if (!widget.isStartAnimation && controller.isAnimating) {
+    } else  if(widget.headStatus==HeadStatus.REFRESH_COMPLETE) {
       controller.stop(canceled: true);
     }
 
@@ -101,6 +110,26 @@ class _RotateWidget extends State<RotateWidget> with TickerProviderStateMixin {
   }
 
   double _getValue() {
-    return double.parse(_value.value.toString());
+    switch(widget.headStatus){
+
+      case HeadStatus.IDLE:
+      case HeadStatus.PULL_REFRESH:
+      case HeadStatus.RELEASE_REFESH:
+      return widget.parentHeight%(math.pi * 24)/12;
+      case HeadStatus.FRESHING:
+        if (!controller.isAnimating) {
+          controller.forward();
+        }
+        return _value.value;
+      case HeadStatus.REFRESH_COMPLETE:
+        if (controller.isAnimating) {
+          controller.forward();
+        }
+       return _value.value;
+    }
+
+    return _value.value;
   }
 }
+
+
