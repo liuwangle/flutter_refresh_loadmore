@@ -165,8 +165,11 @@ class ListViewRefreshLoadMoreWidgetState
 //    }
 //  }
 
-  changeData(int itemCount){
+  changeData(int itemCount,{bool hasMoreData}){
     widget.itemCount=itemCount;
+    if(hasMoreData!=null){
+      widget.hasMoreData=hasMoreData;
+    }
     setState(() {
 
     });
