@@ -35,16 +35,16 @@ enum HeadStatus {
 
 class ListViewRefreshLoadMoreWidget extends StatefulWidget {
 //listview 的item  widget
-  SwrapInsideWidget swrapInsideWidget;
+  final SwrapInsideWidget swrapInsideWidget;
 
   //headviw
-  HeadRefreshWidget headWidget;
+  final HeadRefreshWidget headWidget;
 
   //刷新的回调  不传或者 传null  则关闭刷新
-  RefrshCallback refrshCallback;
+  final RefrshCallback refrshCallback;
 
   //加载更多回调  不传或者 传null  则关闭加载更多
-  LoadMoreCallback loadMoreCallback;
+  final LoadMoreCallback loadMoreCallback;
   bool hasMoreData = true;
   int itemCount;
   FooterRefreshWidget footerWidget;
@@ -56,9 +56,10 @@ class ListViewRefreshLoadMoreWidget extends StatefulWidget {
       this.loadMoreCallback,
       this.headWidget,
       this.footerWidget,
-      @required this.hasMoreData = true,
-      @required this.itemCount = 0})
+      this.hasMoreData = true,
+      this.itemCount = 0})
       : super(key: key);
+
 
   @override
   State<StatefulWidget> createState() {
@@ -121,10 +122,11 @@ class ListViewRefreshLoadMoreWidgetState
       var offset =
           controller.position.maxScrollExtent - controller.position.pixels;
 
-
       if (offset >= 0 && offset <= 35) {
-        if (widget.loadMoreCallback != null && !isLoadingMore && widget.hasMoreData) {
-           isLoadingMore = true ;
+        if (widget.loadMoreCallback != null &&
+            !isLoadingMore &&
+            widget.hasMoreData) {
+          isLoadingMore = true;
           widget.loadMoreCallback().whenComplete(() {
             setState(() {
               isLoadingMore = false;
@@ -135,7 +137,8 @@ class ListViewRefreshLoadMoreWidgetState
     });
     super.initState();
   }
-  bool isLoadingMore=false;
+
+  bool isLoadingMore = false;
 
   ScrollController controller = ScrollController();
   ScrollPhysics physics = const RefreshAlwaysScrollPhysics();
@@ -158,6 +161,7 @@ class ListViewRefreshLoadMoreWidgetState
   }
 
   GlobalKey<State> _listViewKey = new GlobalKey();
+
 //  _listViewUpdate(){
 //    if(_listViewKey.currentState!=null){
 //
@@ -165,15 +169,14 @@ class ListViewRefreshLoadMoreWidgetState
 //    }
 //  }
 
-  changeData(int itemCount,{bool hasMoreData}){
-    widget.itemCount=itemCount;
-    if(hasMoreData!=null){
-      widget.hasMoreData=hasMoreData;
+  changeData(int itemCount, {bool hasMoreData}) {
+    widget.itemCount = itemCount;
+    if (hasMoreData != null) {
+      widget.hasMoreData = hasMoreData;
     }
-    setState(() {
-
-    });
+    setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     if (customHead == null) {
@@ -311,8 +314,8 @@ class ListViewRefreshLoadMoreWidgetState
 //          _update();
     } else if (notification is ScrollStartNotification) {
 //          currentHeight = minHeight;
-    } else {
-    }
+    } else {}
+    return false;
   }
 
   HeadStatus currentHeadStatus;
@@ -330,8 +333,6 @@ class ListViewRefreshLoadMoreWidgetState
     if (headGlobalKey != null && headGlobalKey.currentState != null) {
       headGlobalKey.currentState.setState(() {});
     }
-
-
   }
 
   _updateAlwaysScrollable() {
