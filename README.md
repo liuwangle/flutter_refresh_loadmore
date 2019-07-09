@@ -57,9 +57,10 @@ How To Use
 
 
 下拉默认刷新效果
-https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/refresh.gif
 
+![image](https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/refresh.gif)
 
 
 加载默认更多效果
-https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/loadmore.gif
+
+![image](https://github.com/liuwangle/flutter_refresh_loadmore/blob/master/demon_gif/loadmore.gif)
