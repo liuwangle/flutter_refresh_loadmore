@@ -1,10 +1,9 @@
 import 'dart:math' as math;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'refresh_data.dart';
 import 'refresh_head.dart';
-import 'rotate_widget.dart';
 
 typedef SwrapInsideWidget = Widget Function(BuildContext context, int index);
 
@@ -60,18 +59,18 @@ class ListViewRefreshLoadMoreWidget extends StatefulWidget {
       this.itemCount = 0})
       : super(key: key);
 
-
   @override
   State<StatefulWidget> createState() {
     return ListViewRefreshLoadMoreWidgetState();
   }
 }
 
+const double normalHeight = 60;
+const double minHeight = 0.00001;
+
 class ListViewRefreshLoadMoreWidgetState
     extends State<ListViewRefreshLoadMoreWidget> with TickerProviderStateMixin {
-  double normalHeight = 60;
   double currentHeight = 0;
-  double minHeight = 0.00001;
 
   @override
   void initState() {
@@ -79,7 +78,7 @@ class ListViewRefreshLoadMoreWidgetState
     positonAnimationController =
         AnimationController(duration: Duration(milliseconds: 400), vsync: this);
     endAnimationController =
-        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+        AnimationController(duration: Duration(milliseconds: 400), vsync: this);
 
     WidgetsBinding widgetsBinding = WidgetsBinding.instance;
     //第一帧 绘制完毕
@@ -209,10 +208,8 @@ class ListViewRefreshLoadMoreWidgetState
 
           return widget.swrapInsideWidget(buildContext, index - 1);
         });
-    return RefreshDataWidget(
-      normalHeight: normalHeight,
-      minHeight: minHeight,
-      child: Listener(
+    return
+       Listener(
         onPointerMove: (event) {
           if (endAnimationController.isAnimating ||
               positonAnimationController.isAnimating ||
@@ -242,7 +239,7 @@ class ListViewRefreshLoadMoreWidgetState
             child: listView,
           ),
         ),
-      ),
+
     );
   }
 
@@ -366,22 +363,20 @@ class ListViewRefreshLoadMoreWidgetState
                     Container(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      child: CupertinoActivityIndicator(),
                     ),
                     SizedBox(
-                      width: 15,
+                      width: 10,
                     ),
                     Text(
                       "加载中...",
-                      style: TextStyle(fontSize: 15, color: Color(0Xff222222)),
+                      style: TextStyle(fontSize: 15,color: Colors.black54,),
                     )
                   ],
                 )
               : Text(
                   "暂无更多数据",
-                  style: TextStyle(color: Color(0xff999999)),
+                  style: TextStyle(color: Colors.black54,),
                 )),
     );
   }

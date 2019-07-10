@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'flutter_refresh_loadmore.dart';
 import 'rotate_widget.dart';
 
-import 'refresh_data.dart';
 
 ////高度回调
 //typedef HeightsCallBack = double Function();
@@ -30,17 +29,15 @@ class CustomHead extends StatefulWidget {
   }
 }
 
-RotateWidget rotateWidget;
+CommonHeadWidget rotateWidget;
 
 class CustomHeadState extends State<CustomHead> {
-  double normalHeight = 0;
 
   @override
   Widget build(BuildContext context) {
-    normalHeight = RefreshDataWidget.of(context).normalHeight;
     String statusStr = getText();
     return Container(
-      color: Colors.black12,
+      color: Colors.white,
       height: widget.currentHeight,
       child: SingleChildScrollView(
           child: new Container(
@@ -66,25 +63,30 @@ class CustomHeadState extends State<CustomHead> {
       )),
     );
   }
-
+  CommonHeadWidget _commonHeadWidget;
+  HeadStatus lastHeadStatus;
   _getChildWidget(String statusStr) {
     if (widget.child != null) {
       return widget.child(widget.headStatus, widget.currentHeight);
+    }
+    if(_commonHeadWidget==null || lastHeadStatus!=widget.headStatus){
+      lastHeadStatus=widget.headStatus;
+      _commonHeadWidget= CommonHeadWidget(
+        headStatus: widget.headStatus,
+        parentHeight: widget.currentHeight,
+      );
     }
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        RotateWidget(
-          headStatus: widget.headStatus,
-          parentHeight: widget.currentHeight,
-        ),
+        _commonHeadWidget,
         SizedBox(
           width: 10,
         ),
         Text(
           statusStr,
-          style: TextStyle(fontSize: 15),
+          style: TextStyle(fontSize: 15,color: Colors.black54,),
         )
       ],
     );

@@ -1,6 +1,6 @@
 name: flutter_refresh_loadmore
 description: A refresh loadmore listview package. can pull refresh listview and loadmore ,use  the libray listview  swrap  form the new widget.
-version: 0.1.6
+version: 0.1.7
 author: liu wangle<liuwangle1789@gmail.com>
 homepage: https://github.com/liuwangle/flutter_refresh_loadmore
 
@@ -20,9 +20,9 @@ dev_dependencies:
 # following page: https://www.dartlang.org/tools/pub/pubspec
 
 # The following section is specific to Flutter.
-flutter:
-  assets:
-    - packages/flutter_refresh_loadmore/loading.png
+#flutter:
+#  assets:
+#    - packages/flutter_refresh_loadmore/loading.png
 
   # To add assets to your package, add an assets section, like this:
   # assets:
