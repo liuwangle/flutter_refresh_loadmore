@@ -5,7 +5,7 @@ A refresh loadmore listview package.
 ## Getting Started
 Installing
  ```dart
-flutter_refresh_loadmore: ^0.1.7
+flutter_refresh_loadmore: ^0.1.8
 ```
 
 Import
