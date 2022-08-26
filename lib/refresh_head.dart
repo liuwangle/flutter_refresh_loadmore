@@ -6,9 +6,9 @@ import 'rotate_widget.dart';
 ////高度回调
 //typedef HeightsCallBack = double Function();
 class CustomHead extends StatefulWidget {
-  late final double? currentHeight;
+  double? currentHeight;
   final HeadRefreshWidget? child;
-  late final HeadStatus? headStatus;
+  HeadStatus? headStatus;
 
   CustomHead(
       {Key? key,
