@@ -70,7 +70,7 @@ const double minHeight = 0.00001;
 
 class ListViewRefreshLoadMoreWidgetState
     extends State<ListViewRefreshLoadMoreWidget> with TickerProviderStateMixin {
-  double currentHeight = 0;
+  double? currentHeight;
 
   @override
   void initState() {
@@ -194,6 +194,7 @@ class ListViewRefreshLoadMoreWidgetState
         key: _listViewKey,
         physics: physics,
         itemCount: widget.itemCount! + 2,
+        shrinkWrap: true,
         controller: controller,
         itemBuilder: (buildContext, index) {
           if (index == 0) {
@@ -216,9 +217,9 @@ class ListViewRefreshLoadMoreWidgetState
             currentHeight == normalHeight) {
           return;
         }
-        if (currentHeight > minHeight &&
+        if (currentHeight! > minHeight &&
             physics == const NeverScrollableScrollPhysics()) {
-          currentHeight = currentHeight + event.delta.dy / 3;
+          currentHeight = currentHeight! + event.delta.dy / 3;
           _update();
           _changeStatus();
         }
@@ -243,7 +244,7 @@ class ListViewRefreshLoadMoreWidgetState
   }
 
   _changeStatus() {
-    if (currentHeight >= normalHeight) {
+    if (currentHeight! >= normalHeight) {
       currentHeadStatus = HeadStatus.RELEASE_REFESH;
     } else {
       currentHeadStatus = HeadStatus.PULL_REFRESH;
@@ -254,7 +255,7 @@ class ListViewRefreshLoadMoreWidgetState
     if (positonAnimationController!.isAnimating) {
       return;
     }
-    if (currentHeight > normalHeight) {
+    if (currentHeight! > normalHeight) {
       positonAnimation = Tween(end: normalHeight, begin: currentHeight)
           .animate(positonAnimationController!);
 
@@ -266,7 +267,7 @@ class ListViewRefreshLoadMoreWidgetState
   }
 
   _realseEnd() {
-    if (currentHeight < 10) {
+    if (currentHeight! < 10) {
       currentHeight = minHeight;
       currentHeadStatus = HeadStatus.IDLE;
       _update();
@@ -292,9 +293,9 @@ class ListViewRefreshLoadMoreWidgetState
 
     if (notification is ScrollUpdateNotification) {
       if (notification.dragDetails == null) return false;
-      if (currentHeight > minHeight) {
+      if (currentHeight! > minHeight) {
         _updateNeverScrollable();
-        currentHeight = currentHeight + notification.dragDetails!.delta.dy / 3;
+        currentHeight = currentHeight! + notification.dragDetails!.delta.dy / 3;
         _update();
         _changeStatus();
       } else {
@@ -302,7 +303,7 @@ class ListViewRefreshLoadMoreWidgetState
       }
     } else if (notification is OverscrollNotification) {
       if (notification.dragDetails == null) return false;
-      currentHeight = currentHeight + notification.dragDetails!.delta.dy / 3;
+      currentHeight = currentHeight! + notification.dragDetails!.delta.dy / 3;
       _update();
       _changeStatus();
     } else if (notification is ScrollEndNotification) {
@@ -317,7 +318,7 @@ class ListViewRefreshLoadMoreWidgetState
   HeadStatus? currentHeadStatus;
 
   _update() {
-    if (currentHeight <= minHeight) {
+    if (currentHeight! <= minHeight) {
       currentHeight = minHeight;
       if (endAnimationController!.isAnimating) {
         endAnimationController!.stop();
