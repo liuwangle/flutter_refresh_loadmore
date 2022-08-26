@@ -1,14 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 import 'flutter_refresh_loadmore.dart';
 
 class CommonHeadWidget extends StatefulWidget {
-  final double parentHeight;
+  final double? parentHeight;
 
   //松开手指的时候
-  final HeadStatus headStatus;
+  final HeadStatus? headStatus;
 
   CommonHeadWidget({this.headStatus, this.parentHeight});
 
@@ -20,7 +21,7 @@ class CommonHeadWidget extends StatefulWidget {
 
 class _RotateWidget extends State<CommonHeadWidget>
     with TickerProviderStateMixin {
-  AnimationController animationController;
+  late AnimationController animationController;
 
   @override
   void dispose() {
@@ -44,7 +45,7 @@ class _RotateWidget extends State<CommonHeadWidget>
   }
 
   Widget _getWidget() {
-    switch (widget.headStatus) {
+    switch (widget.headStatus!) {
       case HeadStatus.IDLE:
       case HeadStatus.PULL_REFRESH:
         return Icon(Icons.arrow_downward, color: Colors.black45);
@@ -53,7 +54,7 @@ class _RotateWidget extends State<CommonHeadWidget>
         animationController.forward();
         return AnimatedBuilder(
           animation: animationController,
-          builder: (BuildContext context, Widget child) {
+          builder: (BuildContext context, Widget? child) {
             return Transform.rotate(
               angle: -animationController.value * math.pi,
               child: child,

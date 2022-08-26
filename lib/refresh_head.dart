@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'flutter_refresh_loadmore.dart';
 import 'rotate_widget.dart';
-
 
 ////高度回调
 //typedef HeightsCallBack = double Function();
 class CustomHead extends StatefulWidget {
-  double currentHeight;
-  final HeadRefreshWidget child;
-  HeadStatus headStatus;
+  late final double? currentHeight;
+  final HeadRefreshWidget? child;
+  late final HeadStatus? headStatus;
 
   CustomHead(
-      {Key key,
+      {Key? key,
       this.currentHeight,
       this.child,
       this.headStatus = HeadStatus.IDLE})
@@ -23,16 +22,15 @@ class CustomHead extends StatefulWidget {
     return CustomHeadState();
   }
 
-  updateHeight({double height, HeadStatus headStatus}) {
+  updateHeight({double? height, HeadStatus? headStatus}) {
     this.currentHeight = height;
     this.headStatus = headStatus;
   }
 }
 
-CommonHeadWidget rotateWidget;
+CommonHeadWidget? rotateWidget;
 
 class CustomHeadState extends State<CustomHead> {
-
   @override
   Widget build(BuildContext context) {
     String statusStr = getText();
@@ -63,15 +61,16 @@ class CustomHeadState extends State<CustomHead> {
       )),
     );
   }
-  CommonHeadWidget _commonHeadWidget;
-  HeadStatus lastHeadStatus;
+
+  CommonHeadWidget? _commonHeadWidget;
+  HeadStatus? lastHeadStatus;
   _getChildWidget(String statusStr) {
     if (widget.child != null) {
-      return widget.child(widget.headStatus, widget.currentHeight);
+      return widget.child!(widget.headStatus, widget.currentHeight);
     }
-    if(_commonHeadWidget==null || lastHeadStatus!=widget.headStatus){
-      lastHeadStatus=widget.headStatus;
-      _commonHeadWidget= CommonHeadWidget(
+    if (_commonHeadWidget == null || lastHeadStatus != widget.headStatus) {
+      lastHeadStatus = widget.headStatus;
+      _commonHeadWidget = CommonHeadWidget(
         headStatus: widget.headStatus,
         parentHeight: widget.currentHeight,
       );
@@ -80,13 +79,16 @@ class CustomHeadState extends State<CustomHead> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        _commonHeadWidget,
+        _commonHeadWidget!,
         SizedBox(
           width: 10,
         ),
         Text(
           statusStr,
-          style: TextStyle(fontSize: 15,color: Colors.black54,),
+          style: TextStyle(
+            fontSize: 15,
+            color: Colors.black54,
+          ),
         )
       ],
     );
@@ -94,7 +96,7 @@ class CustomHeadState extends State<CustomHead> {
 
   String getText() {
     String statu = "";
-    switch (widget.headStatus) {
+    switch (widget.headStatus!) {
       case HeadStatus.IDLE:
         statu = "下拉刷新";
         break;
