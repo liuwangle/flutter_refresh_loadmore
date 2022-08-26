@@ -44,8 +44,8 @@ class ListViewRefreshLoadMoreWidget extends StatefulWidget {
 
   //加载更多回调  不传或者 传null  则关闭加载更多
   final LoadMoreCallback? loadMoreCallback;
-  late final bool hasMoreData;
-  late final int itemCount;
+  bool? hasMoreData;
+  int? itemCount;
   final FooterRefreshWidget? footerWidget;
 
   ListViewRefreshLoadMoreWidget(
@@ -91,23 +91,23 @@ class ListViewRefreshLoadMoreWidgetState
 //      print("iiiiiiiiiiiiii   yyyyyyyyyyyy");
 //    });
 
-    endAnimationController.addListener(() {
+    endAnimationController!.addListener(() {
       currentHeight = endAnimation!.value;
       _update();
     });
-    endAnimationController.addStatusListener((status) async {
+    endAnimationController!.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         currentHeadStatus = HeadStatus.IDLE;
         _updateAlwaysScrollable();
       }
     });
 
-    positonAnimationController.addListener(() {
-      currentHeight = positonAnimation.value;
+    positonAnimationController!.addListener(() {
+      currentHeight = positonAnimation!.value;
       currentHeadStatus = HeadStatus.FRESHING;
       _update();
     });
-    positonAnimationController.addStatusListener((status) async {
+    positonAnimationController!.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         widget.refrshCallback!().whenComplete(() {
           currentHeadStatus = HeadStatus.REFRESH_COMPLETE;
@@ -124,7 +124,7 @@ class ListViewRefreshLoadMoreWidgetState
       if (offset >= 0 && offset <= 35) {
         if (widget.loadMoreCallback != null &&
             !isLoadingMore &&
-            widget.hasMoreData) {
+            widget.hasMoreData!) {
           isLoadingMore = true;
           widget.loadMoreCallback!().whenComplete(() {
             setState(() {
@@ -142,10 +142,10 @@ class ListViewRefreshLoadMoreWidgetState
   ScrollController controller = ScrollController();
   ScrollPhysics physics = const RefreshAlwaysScrollPhysics();
 
-  late AnimationController positonAnimationController;
-  late Animation<double> positonAnimation;
+  AnimationController? positonAnimationController;
+  Animation<double>? positonAnimation;
 
-  late AnimationController endAnimationController;
+  AnimationController? endAnimationController;
   Animation<double>? endAnimation;
 
   GlobalKey<CustomHeadState> headGlobalKey = new GlobalKey();
@@ -153,8 +153,9 @@ class ListViewRefreshLoadMoreWidgetState
 
   @override
   void dispose() {
-    positonAnimationController.dispose();
-    endAnimationController.dispose();
+    positonAnimationController!.dispose();
+    endAnimationController!.dispose();
+    controller.dispose();
 
     super.dispose();
   }
@@ -192,14 +193,14 @@ class ListViewRefreshLoadMoreWidgetState
     ListView listView = ListView.builder(
         key: _listViewKey,
         physics: physics,
-        itemCount: widget.itemCount + 2,
+        itemCount: widget.itemCount! + 2,
         controller: controller,
         itemBuilder: (buildContext, index) {
           if (index == 0) {
             return customHead!;
           }
           //最后一个
-          if (index == (widget.itemCount + 1)) {
+          if (index == (widget.itemCount! + 1)) {
             if (index == 1) {
               return Container();
             }
@@ -210,8 +211,8 @@ class ListViewRefreshLoadMoreWidgetState
         });
     return Listener(
       onPointerMove: (event) {
-        if (endAnimationController.isAnimating ||
-            positonAnimationController.isAnimating ||
+        if (endAnimationController!.isAnimating ||
+            positonAnimationController!.isAnimating ||
             currentHeight == normalHeight) {
           return;
         }
@@ -250,15 +251,15 @@ class ListViewRefreshLoadMoreWidgetState
   }
 
   _realseLoading() {
-    if (positonAnimationController.isAnimating) {
+    if (positonAnimationController!.isAnimating) {
       return;
     }
     if (currentHeight > normalHeight) {
       positonAnimation = Tween(end: normalHeight, begin: currentHeight)
-          .animate(positonAnimationController);
+          .animate(positonAnimationController!);
 
-      positonAnimationController.reset();
-      positonAnimationController.forward();
+      positonAnimationController!.reset();
+      positonAnimationController!.forward();
     } else {
       _realseEnd();
     }
@@ -272,19 +273,19 @@ class ListViewRefreshLoadMoreWidgetState
       _updateAlwaysScrollable();
       return;
     }
-    if (currentHeight == minHeight || endAnimationController.isAnimating)
+    if (currentHeight == minHeight || endAnimationController!.isAnimating)
       return;
 
     endAnimation = null;
     endAnimation = Tween(end: minHeight, begin: currentHeight)
-        .animate(endAnimationController);
-    endAnimationController.reset();
-    endAnimationController.forward();
+        .animate(endAnimationController!);
+    endAnimationController!.reset();
+    endAnimationController!.forward();
   }
 
   bool _handNotifications(notification) {
-    if (endAnimationController.isAnimating ||
-        positonAnimationController.isAnimating ||
+    if (endAnimationController!.isAnimating ||
+        positonAnimationController!.isAnimating ||
         currentHeight == normalHeight) {
       return false;
     }
@@ -318,8 +319,8 @@ class ListViewRefreshLoadMoreWidgetState
   _update() {
     if (currentHeight <= minHeight) {
       currentHeight = minHeight;
-      if (endAnimationController.isAnimating) {
-        endAnimationController.stop();
+      if (endAnimationController!.isAnimating) {
+        endAnimationController!.stop();
       }
     }
 
@@ -346,14 +347,14 @@ class ListViewRefreshLoadMoreWidgetState
 
   Widget buildLoadMore() {
     if (widget.footerWidget != null) {
-      return widget.footerWidget!(widget.hasMoreData ? "加载中..." : "暂无更多数据");
+      return widget.footerWidget!(widget.hasMoreData! ? "加载中..." : "暂无更多数据");
     }
     return Container(
       height: 35,
       margin: EdgeInsets.all(10),
       child: Align(
           alignment: Alignment.center,
-          child: widget.hasMoreData
+          child: widget.hasMoreData!
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
