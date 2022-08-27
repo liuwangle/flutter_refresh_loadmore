@@ -8,7 +8,7 @@ import 'rotate_widget.dart';
 class CustomHead extends StatefulWidget {
   double? currentHeight;
   final HeadRefreshWidget? child;
-  HeadStatus? headStatus;
+  HeadStatus headStatus;
 
   CustomHead(
       {Key? key,
@@ -24,7 +24,7 @@ class CustomHead extends StatefulWidget {
 
   updateHeight({double? height, HeadStatus? headStatus}) {
     this.currentHeight = height;
-    this.headStatus = headStatus;
+    this.headStatus = headStatus!;
   }
 }
 
@@ -96,7 +96,7 @@ class CustomHeadState extends State<CustomHead> {
 
   String getText() {
     String statu = "";
-    switch (widget.headStatus!) {
+    switch (widget.headStatus) {
       case HeadStatus.IDLE:
         statu = "下拉刷新";
         break;

@@ -21,10 +21,11 @@ class CommonHeadWidget extends StatefulWidget {
 
 class _RotateWidget extends State<CommonHeadWidget>
     with TickerProviderStateMixin {
-  late AnimationController animationController;
+  AnimationController? animationController;
 
   @override
   void dispose() {
+    animationController!.dispose();
     super.dispose();
   }
 
@@ -50,13 +51,13 @@ class _RotateWidget extends State<CommonHeadWidget>
       case HeadStatus.PULL_REFRESH:
         return Icon(Icons.arrow_downward, color: Colors.black45);
       case HeadStatus.RELEASE_REFESH:
-        animationController.reset();
-        animationController.forward();
+        animationController!.reset();
+        animationController!.forward();
         return AnimatedBuilder(
-          animation: animationController,
+          animation: animationController!,
           builder: (BuildContext context, Widget? child) {
             return Transform.rotate(
-              angle: -animationController.value * math.pi,
+              angle: -animationController!.value * math.pi,
               child: child,
             );
           },
