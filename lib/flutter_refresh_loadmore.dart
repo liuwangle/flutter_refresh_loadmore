@@ -1,7 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'refresh_head.dart';
 
@@ -11,7 +11,7 @@ typedef RefrshCallback = Future Function();
 typedef LoadMoreCallback = Future Function();
 
 typedef HeadRefreshWidget = Widget Function(
-    HeadStatus headStatus, double height);
+    HeadStatus? headStatus, double? height);
 
 typedef FooterRefreshWidget = Widget Function(String str);
 
@@ -37,20 +37,20 @@ class ListViewRefreshLoadMoreWidget extends StatefulWidget {
   final SwrapInsideWidget swrapInsideWidget;
 
   //headviw
-  final HeadRefreshWidget headWidget;
+  final HeadRefreshWidget? headWidget;
 
   //刷新的回调  不传或者 传null  则关闭刷新
-  final RefrshCallback refrshCallback;
+  final RefrshCallback? refrshCallback;
 
   //加载更多回调  不传或者 传null  则关闭加载更多
-  final LoadMoreCallback loadMoreCallback;
-  bool hasMoreData = true;
-  int itemCount;
-  FooterRefreshWidget footerWidget;
+  final LoadMoreCallback? loadMoreCallback;
+  bool? hasMoreData;
+  int? itemCount;
+  final FooterRefreshWidget? footerWidget;
 
   ListViewRefreshLoadMoreWidget(
-      {Key key,
-      @required this.swrapInsideWidget,
+      {Key? key,
+      required this.swrapInsideWidget,
       this.refrshCallback,
       this.loadMoreCallback,
       this.headWidget,
@@ -70,7 +70,7 @@ const double minHeight = 0.00001;
 
 class ListViewRefreshLoadMoreWidgetState
     extends State<ListViewRefreshLoadMoreWidget> with TickerProviderStateMixin {
-  double currentHeight = 0;
+  double? currentHeight;
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class ListViewRefreshLoadMoreWidgetState
     endAnimationController =
         AnimationController(duration: Duration(milliseconds: 400), vsync: this);
 
-    WidgetsBinding widgetsBinding = WidgetsBinding.instance;
+    WidgetsBinding widgetsBinding = WidgetsBinding.instance!;
     //第一帧 绘制完毕
     widgetsBinding.addPostFrameCallback((callback) {
 //      animationController.forward();
@@ -91,25 +91,25 @@ class ListViewRefreshLoadMoreWidgetState
 //      print("iiiiiiiiiiiiii   yyyyyyyyyyyy");
 //    });
 
-    endAnimationController.addListener(() {
-      currentHeight = endAnimation.value;
+    endAnimationController!.addListener(() {
+      currentHeight = endAnimation!.value;
       _update();
     });
-    endAnimationController.addStatusListener((status) async {
+    endAnimationController!.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         currentHeadStatus = HeadStatus.IDLE;
         _updateAlwaysScrollable();
       }
     });
 
-    positonAnimationController.addListener(() {
-      currentHeight = positonAnimation.value;
+    positonAnimationController!.addListener(() {
+      currentHeight = positonAnimation!.value;
       currentHeadStatus = HeadStatus.FRESHING;
       _update();
     });
-    positonAnimationController.addStatusListener((status) async {
+    positonAnimationController!.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        widget.refrshCallback().whenComplete(() {
+        widget.refrshCallback!().whenComplete(() {
           currentHeadStatus = HeadStatus.REFRESH_COMPLETE;
           _realseEnd();
         });
@@ -124,9 +124,9 @@ class ListViewRefreshLoadMoreWidgetState
       if (offset >= 0 && offset <= 35) {
         if (widget.loadMoreCallback != null &&
             !isLoadingMore &&
-            widget.hasMoreData) {
+            widget.hasMoreData!) {
           isLoadingMore = true;
-          widget.loadMoreCallback().whenComplete(() {
+          widget.loadMoreCallback!().whenComplete(() {
             setState(() {
               isLoadingMore = false;
             });
@@ -142,19 +142,20 @@ class ListViewRefreshLoadMoreWidgetState
   ScrollController controller = ScrollController();
   ScrollPhysics physics = const RefreshAlwaysScrollPhysics();
 
-  AnimationController positonAnimationController;
-  Animation<double> positonAnimation;
+  AnimationController? positonAnimationController;
+  Animation<double>? positonAnimation;
 
-  AnimationController endAnimationController;
-  Animation<double> endAnimation;
+  AnimationController? endAnimationController;
+  Animation<double>? endAnimation;
 
   GlobalKey<CustomHeadState> headGlobalKey = new GlobalKey();
-  CustomHead customHead;
+  CustomHead? customHead;
 
   @override
   void dispose() {
-    positonAnimationController.dispose();
-    endAnimationController.dispose();
+    positonAnimationController!.dispose();
+    endAnimationController!.dispose();
+    controller.dispose();
 
     super.dispose();
   }
@@ -168,7 +169,7 @@ class ListViewRefreshLoadMoreWidgetState
 //    }
 //  }
 
-  changeData(int itemCount, {bool hasMoreData}) {
+  changeData(int itemCount, {bool? hasMoreData}) {
     widget.itemCount = itemCount;
     if (hasMoreData != null) {
       widget.hasMoreData = hasMoreData;
@@ -185,21 +186,22 @@ class ListViewRefreshLoadMoreWidgetState
         key: headGlobalKey,
       );
     } else {
-      customHead.updateHeight(
-          height: currentHeight, headStatus: currentHeadStatus);
+      customHead!
+          .updateHeight(height: currentHeight, headStatus: currentHeadStatus);
     }
 
     ListView listView = ListView.builder(
         key: _listViewKey,
         physics: physics,
-        itemCount: widget.itemCount + 2,
+        itemCount: widget.itemCount! + 2,
+        shrinkWrap: true,
         controller: controller,
         itemBuilder: (buildContext, index) {
           if (index == 0) {
-            return customHead;
+            return customHead!;
           }
           //最后一个
-          if (index == (widget.itemCount + 1)) {
+          if (index == (widget.itemCount! + 1)) {
             if (index == 1) {
               return Container();
             }
@@ -208,43 +210,41 @@ class ListViewRefreshLoadMoreWidgetState
 
           return widget.swrapInsideWidget(buildContext, index - 1);
         });
-    return
-       Listener(
-        onPointerMove: (event) {
-          if (endAnimationController.isAnimating ||
-              positonAnimationController.isAnimating ||
-              currentHeight == normalHeight) {
-            return;
-          }
-          if (currentHeight > minHeight &&
-              physics == const NeverScrollableScrollPhysics()) {
-            currentHeight = currentHeight + event.delta.dy / 3;
-            _update();
-            _changeStatus();
-          }
-          if (currentHeight == minHeight) {
-            _updateAlwaysScrollable();
-          }
-        },
-        onPointerUp: (event) {
-          _realseLoading();
-        },
-        onPointerCancel: (event) {
-          _realseLoading();
-        },
-        child: NotificationListener<Notification>(
-          onNotification: _handNotifications,
-          child: ScrollConfiguration(
-            behavior: MyBehavior(false, false, Colors.white),
-            child: listView,
-          ),
+    return Listener(
+      onPointerMove: (event) {
+        if (endAnimationController!.isAnimating ||
+            positonAnimationController!.isAnimating ||
+            currentHeight == normalHeight) {
+          return;
+        }
+        if (currentHeight! > minHeight &&
+            physics == const NeverScrollableScrollPhysics()) {
+          currentHeight = currentHeight! + event.delta.dy / 3;
+          _update();
+          _changeStatus();
+        }
+        if (currentHeight == minHeight) {
+          _updateAlwaysScrollable();
+        }
+      },
+      onPointerUp: (event) {
+        _realseLoading();
+      },
+      onPointerCancel: (event) {
+        _realseLoading();
+      },
+      child: NotificationListener<Notification>(
+        onNotification: _handNotifications,
+        child: ScrollConfiguration(
+          behavior: MyBehavior(false, false, Colors.white),
+          child: listView,
         ),
-
+      ),
     );
   }
 
   _changeStatus() {
-    if (currentHeight >= normalHeight) {
+    if (currentHeight! >= normalHeight) {
       currentHeadStatus = HeadStatus.RELEASE_REFESH;
     } else {
       currentHeadStatus = HeadStatus.PULL_REFRESH;
@@ -252,50 +252,50 @@ class ListViewRefreshLoadMoreWidgetState
   }
 
   _realseLoading() {
-    if (positonAnimationController.isAnimating) {
+    if (positonAnimationController!.isAnimating) {
       return;
     }
-    if (currentHeight > normalHeight) {
+    if (currentHeight! > normalHeight) {
       positonAnimation = Tween(end: normalHeight, begin: currentHeight)
-          .animate(positonAnimationController);
+          .animate(positonAnimationController!);
 
-      positonAnimationController.reset();
-      positonAnimationController.forward();
+      positonAnimationController!.reset();
+      positonAnimationController!.forward();
     } else {
       _realseEnd();
     }
   }
 
   _realseEnd() {
-    if (currentHeight < 10) {
+    if (currentHeight! < 10) {
       currentHeight = minHeight;
       currentHeadStatus = HeadStatus.IDLE;
       _update();
       _updateAlwaysScrollable();
       return;
     }
-    if (currentHeight == minHeight || endAnimationController.isAnimating)
+    if (currentHeight == minHeight || endAnimationController!.isAnimating)
       return;
 
     endAnimation = null;
     endAnimation = Tween(end: minHeight, begin: currentHeight)
-        .animate(endAnimationController);
-    endAnimationController.reset();
-    endAnimationController.forward();
+        .animate(endAnimationController!);
+    endAnimationController!.reset();
+    endAnimationController!.forward();
   }
 
   bool _handNotifications(notification) {
-    if (endAnimationController.isAnimating ||
-        positonAnimationController.isAnimating ||
+    if (endAnimationController!.isAnimating ||
+        positonAnimationController!.isAnimating ||
         currentHeight == normalHeight) {
       return false;
     }
 
     if (notification is ScrollUpdateNotification) {
       if (notification.dragDetails == null) return false;
-      if (currentHeight > minHeight) {
+      if (currentHeight! > minHeight) {
         _updateNeverScrollable();
-        currentHeight = currentHeight + notification.dragDetails.delta.dy / 3;
+        currentHeight = currentHeight! + notification.dragDetails!.delta.dy / 3;
         _update();
         _changeStatus();
       } else {
@@ -303,7 +303,7 @@ class ListViewRefreshLoadMoreWidgetState
       }
     } else if (notification is OverscrollNotification) {
       if (notification.dragDetails == null) return false;
-      currentHeight = currentHeight + notification.dragDetails.delta.dy / 3;
+      currentHeight = currentHeight! + notification.dragDetails!.delta.dy / 3;
       _update();
       _changeStatus();
     } else if (notification is ScrollEndNotification) {
@@ -315,20 +315,20 @@ class ListViewRefreshLoadMoreWidgetState
     return false;
   }
 
-  HeadStatus currentHeadStatus;
+  HeadStatus? currentHeadStatus;
 
   _update() {
-    if (currentHeight <= minHeight) {
+    if (currentHeight! <= minHeight) {
       currentHeight = minHeight;
-      if (endAnimationController.isAnimating) {
-        endAnimationController.stop();
+      if (endAnimationController!.isAnimating) {
+        endAnimationController!.stop();
       }
     }
 
-    customHead.updateHeight(
-        height: currentHeight, headStatus: currentHeadStatus);
+    customHead!
+        .updateHeight(height: currentHeight, headStatus: currentHeadStatus);
     if (headGlobalKey != null && headGlobalKey.currentState != null) {
-      headGlobalKey.currentState.setState(() {});
+      headGlobalKey.currentState!.setState(() {});
     }
   }
 
@@ -348,14 +348,14 @@ class ListViewRefreshLoadMoreWidgetState
 
   Widget buildLoadMore() {
     if (widget.footerWidget != null) {
-      return widget.footerWidget(widget.hasMoreData ? "加载中..." : "暂无更多数据");
+      return widget.footerWidget!(widget.hasMoreData! ? "加载中..." : "暂无更多数据");
     }
     return Container(
       height: 35,
       margin: EdgeInsets.all(10),
       child: Align(
           alignment: Alignment.center,
-          child: widget.hasMoreData
+          child: widget.hasMoreData!
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -370,13 +370,18 @@ class ListViewRefreshLoadMoreWidgetState
                     ),
                     Text(
                       "加载中...",
-                      style: TextStyle(fontSize: 15,color: Colors.black54,),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.black54,
+                      ),
                     )
                   ],
                 )
               : Text(
                   "暂无更多数据",
-                  style: TextStyle(color: Colors.black54,),
+                  style: TextStyle(
+                    color: Colors.black54,
+                  ),
                 )),
     );
   }
@@ -392,20 +397,20 @@ class MyBehavior extends ScrollBehavior {
       this.isShowLeadingGlow, this.isShowTrailingGlow, this._kDefaultGlowColor);
 
   @override
-  Widget buildViewportChrome(
-      BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails axisDirection) {
     //如果头部或底部有一个 不需要 显示光晕时 返回GlowingOverscrollIndicator
     if (!isShowLeadingGlow || !isShowTrailingGlow) {
       return new GlowingOverscrollIndicator(
         showLeading: isShowLeadingGlow,
         showTrailing: isShowTrailingGlow,
         child: child,
-        axisDirection: axisDirection,
+        axisDirection: axisDirection.direction,
         color: _kDefaultGlowColor,
       );
     } else {
       //都需要光晕时  返回系统默认
-      return super.buildViewportChrome(context, child, axisDirection);
+      return super.buildOverscrollIndicator(context, child, axisDirection);
     }
   }
 }
@@ -413,11 +418,11 @@ class MyBehavior extends ScrollBehavior {
 ///切记 继承ScrollPhysics  必须重写applyTo，，在NeverScrollableScrollPhysics类里面复制就可以
 ///此类用来控制IOS过度滑动出现弹簧效果
 class RefreshAlwaysScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const RefreshAlwaysScrollPhysics({ScrollPhysics parent})
+  const RefreshAlwaysScrollPhysics({ScrollPhysics? parent})
       : super(parent: parent);
 
   @override
-  RefreshAlwaysScrollPhysics applyTo(ScrollPhysics ancestor) {
+  RefreshAlwaysScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return new RefreshAlwaysScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -461,11 +466,11 @@ class RefreshAlwaysScrollPhysics extends AlwaysScrollableScrollPhysics {
 
   ///防止ios设备出现卡顿
   @override
-  Simulation createBallisticSimulation(
+  Simulation? createBallisticSimulation(
       ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
-      double end;
+      double? end;
       if (position.pixels > position.maxScrollExtent)
         end = position.maxScrollExtent;
       if (position.pixels < position.minScrollExtent)
